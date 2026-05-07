@@ -1,0 +1,84 @@
+// prisma/schema.prisma
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  name          String?
+  username      String    @unique
+  passwordHash  String
+  walletAddress String?   @unique
+  avatarUrl     String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  paymentLinks  PaymentLink[]
+  transactions  Transaction[]
+  customers     Customer[]
+}
+
+model PaymentLink {
+  id          String    @id @default(cuid())
+  slug        String    @unique  // e.g. "abc123" → ojapay.xyz/pay/abc123
+  service     String
+  amount      Float
+  currency    String    @default("USDC")
+  description String?
+  network     String    @default("base")
+  expiresAt   DateTime?
+  isActive    Boolean   @default(true)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  userId       String
+  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  transactions Transaction[]
+}
+
+model Transaction {
+  id            String   @id @default(cuid())
+  txHash        String   @unique
+  amount        Float
+  currency      String   @default("USDC")
+  network       String   @default("base")
+  fromAddress   String
+  toAddress     String
+  status        TxStatus @default(PENDING)
+  blockNumber   BigInt?
+  confirmedAt   DateTime?
+  createdAt     DateTime @default(now())
+
+  paymentLinkId String
+  paymentLink   PaymentLink @relation(fields: [paymentLinkId], references: [id])
+  userId        String
+  user          User        @relation(fields: [userId], references: [id])
+  customerId    String?
+  customer      Customer?   @relation(fields: [customerId], references: [id])
+}
+
+model Customer {
+  id        String   @id @default(cuid())
+  name      String?
+  email     String?
+  wallet    String
+  createdAt DateTime @default(now())
+
+  userId       String
+  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  transactions Transaction[]
+
+  @@unique([userId, wallet])
+}
+
+enum TxStatus {
+  PENDING
+  CONFIRMED
+  FAILED
+}
