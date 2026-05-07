@@ -1,0 +1,28 @@
+{
+  "framework": "nextjs",
+  "buildCommand": "npx prisma generate && next build",
+  "installCommand": "npm install",
+  "outputDirectory": ".next",
+  "env": [
+    "DATABASE_URL",
+    "NEXTAUTH_URL",
+    "NEXTAUTH_SECRET",
+    "RESEND_API_KEY",
+    "EMAIL_FROM",
+    "NEXT_PUBLIC_ALCHEMY_ID",
+    "NEXT_PUBLIC_WALLET_CONNECT_ID",
+    "NEXT_PUBLIC_BASE_CHAIN_ID",
+    "NEXT_PUBLIC_USDC_CONTRACT_BASE",
+    "NEXT_PUBLIC_APP_URL",
+    "WEBHOOK_SECRET"
+  ],
+  "headers": [
+    {
+      "source": "/api/(.*)",
+      "headers": [
+        { "key": "Access-Control-Allow-Origin",  "value": "*" },
+        { "key": "Access-Control-Allow-Methods", "value": "GET,POST,PUT,DELETE,OPTIONS" }
+      ]
+    }
+  ]
+}
